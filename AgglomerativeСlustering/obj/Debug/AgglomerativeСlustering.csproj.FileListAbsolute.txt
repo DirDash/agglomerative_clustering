@@ -13,3 +13,18 @@ C:\Users\dirda_000\Documents\Visual Studio 2017\Projects\AgglomerativeСlusterin
 C:\Users\dirda_000\Documents\Visual Studio 2017\Projects\AgglomerativeСlustering\AgglomerativeСlustering\obj\Debug\AgglomerativeСlustering.csproj.CoreCompileInputs.cache
 C:\Users\dirda_000\Documents\Visual Studio 2017\Projects\AgglomerativeСlustering\AgglomerativeСlustering\obj\Debug\AgglomerativeСlustering.exe
 C:\Users\dirda_000\Documents\Visual Studio 2017\Projects\AgglomerativeСlustering\AgglomerativeСlustering\obj\Debug\AgglomerativeСlustering.pdb
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\bin\Debug\AgglomerativeСlustering.exe.config
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\bin\Debug\AgglomerativeСlustering.exe
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\bin\Debug\AgglomerativeСlustering.pdb
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\obj\Debug\AgglomerativeСlustering.csprojResolveAssemblyReference.cache
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\obj\Debug\MainWindow.g.cs
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\obj\Debug\App.g.cs
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\obj\Debug\AgglomerativeСlustering_MarkupCompile.cache
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\obj\Debug\AgglomerativeСlustering_MarkupCompile.lref
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\obj\Debug\MainWindow.baml
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\obj\Debug\AgglomerativeСlustering.g.resources
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\obj\Debug\AgglomerativeСlustering.Properties.Resources.resources
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\obj\Debug\AgglomerativeСlustering.csproj.GenerateResource.Cache
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\obj\Debug\AgglomerativeСlustering.csproj.CoreCompileInputs.cache
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\obj\Debug\AgglomerativeСlustering.exe
+C:\Users\dirda_000\Documents\Agglomerative Clustering\AgglomerativeСlustering\obj\Debug\AgglomerativeСlustering.pdb

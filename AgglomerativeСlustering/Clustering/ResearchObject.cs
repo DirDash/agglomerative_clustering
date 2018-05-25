@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AgglomerativeСlustering.Classes
+namespace AgglomerativeСlustering.Clustering
 {
     public class ResearchObject : ICloneable
     {

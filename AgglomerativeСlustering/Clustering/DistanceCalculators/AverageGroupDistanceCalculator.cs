@@ -1,19 +1,19 @@
-﻿namespace AgglomerativeСlustering.Classes
+﻿namespace AgglomerativeСlustering.Clustering.DistanceCalculators
 {
-    public class CenterDistanceCalculator : IDistanceCalculator
+    public class AverageGroupDistanceCalculator : IDistanceCalculator
     {
         public double GetDistance(int xCount, int yCount, int zCount, double xzDistance, double yzDistance, double xyDistance)
         {
             double alphaX = (double)xCount / (xCount + yCount);
             double alphaY = (double)yCount / (xCount + yCount);
-            double beta = -1 * alphaX * alphaY;
+            double beta = 0;
             double gamma = 0;
             return ClustersDistanceCalculator.GetLanceWilliamsDistance(xzDistance, yzDistance, xyDistance, alphaX, alphaY, beta, gamma);
         }
 
         public override string ToString()
         {
-            return "расстояние между центрами";
+            return "среднее групповое расстояние";
         }
     }
 }

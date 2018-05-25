@@ -5,13 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AgglomerativeСlustering"
         mc:Ignorable="d"
-        Title="Агломеративная иерархическая кластеризация" Height="720" Width="1280">
-    <Grid Background="Gray">
-        <Grid HorizontalAlignment="Left" Height="689" VerticalAlignment="Top" Width="306" Background="LightGray">
-            <Grid HorizontalAlignment="Left" Height="128" VerticalAlignment="Top" Width="296">
-                <Label Content="Показатели" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        Title="Агломеративная иерархическая кластеризация" Height="720" Width="1280" Icon="Resources/clustering_icon.ico" ResizeMode="NoResize" Foreground="Black"  >
+    <Grid Width="1280" Height="720" MinWidth="1280" MinHeight="720" ScrollViewer.VerticalScrollBarVisibility="Disabled" Background="#FFE8E8E8">
+        <Grid HorizontalAlignment="Left" Height="689" VerticalAlignment="Top" Width="311">
+            <Grid HorizontalAlignment="Left" Height="138" VerticalAlignment="Top" Width="301" Margin="10,10,0,0">
+                <Border BorderBrush="#BBB" BorderThickness="1" CornerRadius="4" />
+                <Label Content="Показатели" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
                 <Label Content="Название файла:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,23,0,0"/>
-                <Label x:Name="FilenameLbl" Content="файл не выбран" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="112,23,0,0" Width="184"/>
+                <Label x:Name="FilenameLbl" Content="файл не выбран" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="112,23,0,0" Width="184" Foreground="#FF616161" FontWeight="Bold"/>
                 <Label Content="Количество объектов:" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top"/>
                 <Label x:Name="ObjectsAmountLbl" Content="0" HorizontalAlignment="Left" Margin="142,49,0,0" VerticalAlignment="Top" Width="144"/>
                 <Label Content="Текущее количество кластеров:" HorizontalAlignment="Left" Margin="10,75,0,0" VerticalAlignment="Top"/>
@@ -19,32 +20,35 @@
                 <Label Content="Среднее межкластерное расстояние:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,101,0,0"/>
                 <Label x:Name="AvgClusterDistanceLbl" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="224,101,0,0" Width="62" RenderTransformOrigin="0.468,0.231"/>
             </Grid>
-            <Grid HorizontalAlignment="Left" Height="186" VerticalAlignment="Top" Width="296" Margin="0,133,0,0">
-                <Label Content="Параметры кластеризации" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <Grid HorizontalAlignment="Left" Height="198" VerticalAlignment="Top" Width="301" Margin="10,153,0,0">
+                <Border BorderBrush="#BBB" BorderThickness="1" CornerRadius="4" />
+                <Label Content="Параметры кластеризации" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
                 <Label Content="Алгоритм:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,23,0,0"/>
-                <ComboBox x:Name="ClusterizatorCb" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" Width="276" SelectionChanged="ClusterizatorCb_SelectionChanged"/>
+                <ComboBox x:Name="ClusterizatorCb" HorizontalAlignment="Left" Margin="10,49,0,0" VerticalAlignment="Top" Width="276" VerticalContentAlignment="Center" SelectionChanged="ClusterizatorCb_SelectionChanged"/>
                 <Label Content="Функция нахождения расстояния:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="9,76,0,0"/>
-                <ComboBox x:Name="DistanceCalculatorCb" HorizontalAlignment="Left" Margin="9,102,0,0" VerticalAlignment="Top" Width="277" SelectionChanged="DistanceCalculatorCb_SelectionChanged"/>
+                <ComboBox x:Name="DistanceCalculatorCb" HorizontalAlignment="Left" Margin="9,102,0,0" VerticalAlignment="Top" Width="277" VerticalContentAlignment="Center" SelectionChanged="DistanceCalculatorCb_SelectionChanged"/>
                 <Label Content="Коэффициент n__1:" HorizontalAlignment="Left" Margin="9,129,0,0" VerticalAlignment="Top"/>
-                <TextBox x:Name="N1Tbx" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="250" VerticalAlignment="Top" Width="168" Margin="118,133,0,0" TextChanged="N1Tbx_TextChanged"/>
+                <TextBox x:Name="N1Tbx" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="50" VerticalAlignment="Top" Width="168" VerticalContentAlignment="Center" Margin="118,130,0,0" TextChanged="N1Tbx_TextChanged"/>
                 <Label Content="Коэффициент n__2:" HorizontalAlignment="Left" Margin="9,155,0,0" VerticalAlignment="Top"/>
-                <TextBox x:Name="N2Tbx" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="50" VerticalAlignment="Top" Width="168" Margin="118,159,0,0" TextChanged="N2Tbx_TextChanged"/>
+                <TextBox x:Name="N2Tbx" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="20" VerticalAlignment="Top" Width="168" VerticalContentAlignment="Center" Margin="118,156,0,0" TextChanged="N2Tbx_TextChanged"/>
             </Grid>
-            <Grid HorizontalAlignment="Left" Height="136" VerticalAlignment="Top" Width="296" Margin="0,324,0,0">
-                <Label Content="Параметры отрисовки" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <Grid HorizontalAlignment="Left" Height="95" VerticalAlignment="Top" Width="301" Margin="10,356,0,0">
+                <Border BorderBrush="#BBB" BorderThickness="1" CornerRadius="4" />
+                <Label Content="Параметры отображения" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold"/>
                 <Label Content="Количество кластеров:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,26,0,0"/>
-                <TextBox x:Name="ClusterAmountTbx" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="140" Margin="146,30,0,0" TextChanged="ClusterAmountTbx_TextChanged"/>
-                <Label Content="Радиус точек:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,52,0,0"/>
-                <TextBox x:Name="RadiusTbx" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="4" VerticalAlignment="Top" Width="191" Margin="95,56,0,0" TextChanged="RadiusTbx_TextChanged"/>
-                <Button x:Name="VisuzlizeBtn" IsEnabled="False" Content="Отрисовать" HorizontalAlignment="Left" Margin="69,86,0,0" VerticalAlignment="Top" Width="161" Height="40" Click="VisuzlizeBtn_Click"/>
+                <TextBox x:Name="ClusterAmountTbx" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="142" VerticalContentAlignment="Center" Margin="146,27,0,0" TextChanged="ClusterAmountTbx_TextChanged"/>
+                <Label Content="Размер точки:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,52,0,0"/>
+                <TextBox x:Name="RadiusTbx" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="4" VerticalAlignment="Top" Width="191" VerticalContentAlignment="Center" Margin="97,53,0,0" TextChanged="RadiusTbx_TextChanged"/>
             </Grid>
-            <Button x:Name="GetDataBtn" HorizontalAlignment="Left" Margin="10,465,0,0" VerticalAlignment="Top" Width="286" Height="68" Content="Загрузить данные из файла" Click="GetDataBtn_Click" />
-            <Button x:Name="ClusterizeBtn" IsEnabled="False" HorizontalAlignment="Left" Margin="10,538,0,0" VerticalAlignment="Top" Width="286" Height="68" Content="Кластеризовать" Click="ClusterizeBtn_Click" />
-            <Button x:Name="SaveDataBtn" IsEnabled="False" HorizontalAlignment="Left" Margin="10,611,0,0" VerticalAlignment="Top" Width="286" Height="68" Content="Сохранить результат в файл" Click="SaveDataBtn_Click" />
+            <Button x:Name="GetDataBtn" HorizontalAlignment="Left" Margin="10,456,0,0" VerticalAlignment="Top" Width="301" Height="47" Content="Загрузить объекты" Click="GetDataBtn_Click" Background="#FF42A5F5" Foreground="White" BorderBrush="#FF42A5F5" FontFamily="Segoe UI Semibold" />
+            <Button x:Name="ClusterizeBtn" IsEnabled="False" HorizontalAlignment="Left" Margin="10,508,0,0" VerticalAlignment="Top" Width="301" Height="47" Content="Кластеризовать объекты" Click="ClusterizeBtn_Click" Background="#FF42A5F5" BorderBrush="#FF42A5F5" Foreground="White" FontFamily="Segoe UI Semibold" />
+            <Button x:Name="VisualizeBtn" IsEnabled="False" Content="Отобразить кластеры" HorizontalAlignment="Left" Margin="10,560,0,0" VerticalAlignment="Top" Width="301" Height="47" Click="VisuzlizeBtn_Click" Background="#FF42A5F5" BorderBrush="#FF42A5F5" Foreground="White" FontFamily="Segoe UI Semibold"/>
+            <Button x:Name="SaveDataBtn" IsEnabled="False" HorizontalAlignment="Left" Margin="10,612,0,0" VerticalAlignment="Top" Width="301" Height="47" Content="Сохранить кластеры" Click="SaveDataBtn_Click" Background="#FF42A5F5" BorderBrush="#FF42A5F5" Foreground="White" FontFamily="Segoe UI Semibold" />
+
         </Grid>
-        <Grid HorizontalAlignment="Left" Height="689" VerticalAlignment="Top" Width="961" Background="LightGray" Margin="311,0,0,0">
-            <Label x:Name="FirstFeatureLbl" Content="Первое свойство" Canvas.Left="406" HorizontalAlignment="Center" Canvas.Top="10" Margin="430,660,426,0" RenderTransformOrigin="0.543,1.069"/>
-            <Label x:Name="SecondFeatureLbl" VerticalAlignment="Center" Grid.Column="0" Content="Второе свойство" HorizontalContentAlignment="Center" Canvas.Left="1" Canvas.Top="277" Margin="-3,262,814,277">
+        <Grid HorizontalAlignment="Left" Height="689" VerticalAlignment="Top" Width="961" Margin="311,0,0,0">
+            <Label x:Name="FirstFeatureLbl" Content="Первое свойство" Canvas.Left="406" HorizontalAlignment="Center" Canvas.Top="10" Margin="428,655,428,5" RenderTransformOrigin="0.543,1.069"/>
+            <Label x:Name="SecondFeatureLbl" VerticalAlignment="Center" Grid.Column="0" Content="Второе свойство" HorizontalContentAlignment="Center" Canvas.Left="1" Canvas.Top="277" Margin="-3,260,814,279">
                 <Label.LayoutTransform>
                     <TransformGroup>
                         <RotateTransform Angle="90" />
@@ -52,8 +56,8 @@
                     </TransformGroup>
                 </Label.LayoutTransform>
             </Label>
-            <Label x:Name="FirstFeatureMinLbl" Visibility="Hidden" HorizontalContentAlignment="Left" Content="0" Margin="17,660,536,0"/>
-            <Label x:Name="SecondFeatureMinLbl" Visibility="Hidden" Grid.Column="0" Content="0" HorizontalContentAlignment="Left" Canvas.Left="1" Canvas.Top="277" Margin="-3,538,904,28">
+            <Label x:Name="FirstFeatureMinLbl"  HorizontalContentAlignment="Left" Content="0" Margin="22,655,594,5"/>
+            <Label x:Name="SecondFeatureMinLbl"  Grid.Column="0" Content="0" HorizontalContentAlignment="Left" Canvas.Left="1" Canvas.Top="277" Margin="-3,538,904,28">
                 <Label.LayoutTransform>
                     <TransformGroup>
                         <RotateTransform Angle="90" />
@@ -61,8 +65,8 @@
                     </TransformGroup>
                 </Label.LayoutTransform>
             </Label>
-            <Label x:Name="FirstFeatureMaxLbl" Visibility="Hidden" HorizontalContentAlignment="Right" Content="929" Margin="529,660,21,5" Width="411"/>
-            <Label x:Name="SecondFeatureMaxLbl" Visibility="Hidden" Grid.Column="0" Content="655" HorizontalContentAlignment="Right" Canvas.Left="1" Canvas.Top="277" Margin="-4,9,867,608">
+            <Label x:Name="FirstFeatureMaxLbl" HorizontalContentAlignment="Right" Content="929" Margin="574,655,21,10"/>
+            <Label x:Name="SecondFeatureMaxLbl" Grid.Column="0" Content="655" HorizontalContentAlignment="Right" Canvas.Left="1" Canvas.Top="277" Margin="-4,9,867,608">
                 <Label.LayoutTransform>
                     <TransformGroup>
                         <RotateTransform Angle="90" />
@@ -70,14 +74,14 @@
                     </TransformGroup>
                 </Label.LayoutTransform>
             </Label>
-            <Line X1="21" Y1="661" X2="940" Y2="661" Stroke="Black" StrokeThickness="1" />
-            <Line X1="927" Y1="658" X2="940" Y2="661" Panel.ZIndex="10" Stroke="Black" StrokeThickness="1" />
-            <Line X1="927" Y1="664" X2="940" Y2="661" Panel.ZIndex="10" Stroke="Black" StrokeThickness="1" />
-            <Line X1="21" Y1="661" X2="21" Y2="10" Stroke="Black" StrokeThickness="1" />
+            <Line X1="21" Y1="656" X2="940" Y2="656" Stroke="Black" StrokeThickness="1" />
+            <Line X1="927" Y1="653" X2="940" Y2="656" Panel.ZIndex="10" Stroke="Black" StrokeThickness="1" />
+            <Line X1="927" Y1="659" X2="940" Y2="656" Panel.ZIndex="10" Stroke="Black" StrokeThickness="1" />
+            <Line X1="21" Y1="656" X2="21" Y2="10" Stroke="Black" StrokeThickness="1" />
             <Line X1="24" Y1="23" X2="21" Y2="10" Stroke="Black" StrokeThickness="1" Panel.ZIndex="10"/>
             <Line X1="18" Y1="23" X2="21" Y2="10" Stroke="Black" StrokeThickness="1" Panel.ZIndex="10"/>
-            <Canvas x:Name="VisualizationCanvas" HorizontalAlignment="Left" Height="650" VerticalAlignment="Top" Width="918" Margin="22,10,0,0" Background="White">
-                
+            <Canvas x:Name="VisualizationCanvas" HorizontalAlignment="Left" Height="645" VerticalAlignment="Top" Width="918" Margin="22,10,0,0" Background="White">
+
             </Canvas>
         </Grid>
     </Grid>

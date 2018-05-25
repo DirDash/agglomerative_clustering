@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using AgglomerativeСlustering.Clustering.Colors;
 
-namespace AgglomerativeСlustering.Classes
+namespace AgglomerativeСlustering.Clustering
 {
     public class Cluster : ICloneable
     {

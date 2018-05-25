@@ -1,4 +1,4 @@
-﻿namespace AgglomerativeСlustering.Classes
+﻿namespace AgglomerativeСlustering.Clustering.DistanceCalculators
 {
     public class ClosestNeighborDistanceCalculator : IDistanceCalculator
     {

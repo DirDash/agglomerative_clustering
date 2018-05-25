@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AgglomerativeСlustering.Classes
+namespace AgglomerativeСlustering.Clustering.Metrics
 {
     public static class EuclideanMetric
     {

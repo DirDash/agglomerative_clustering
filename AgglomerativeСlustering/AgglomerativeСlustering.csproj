@@ -36,6 +36,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -62,21 +63,21 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Classes\ClusterSystem.cs" />
-    <Compile Include="Classes\Dendrogram.cs" />
-    <Compile Include="Classes\FastLanceWilliamsAlgorithm.cs" />
-    <Compile Include="Classes\AverageGroupDistanceCalculator.cs" />
-    <Compile Include="Classes\CenterDistanceCalculator.cs" />
-    <Compile Include="Classes\Cluster.cs" />
-    <Compile Include="Classes\RGBColor.cs" />
-    <Compile Include="Classes\RGBColorCreator.cs" />
-    <Compile Include="Classes\ClustersDistanceCalculator.cs" />
-    <Compile Include="Classes\ClosestNeighborDistance.cs" />
-    <Compile Include="Classes\FarestNeighborDistanceCalculator.cs" />
-    <Compile Include="Classes\IDistanceCalculator.cs" />
-    <Compile Include="Classes\ResearchObject.cs" />
-    <Compile Include="Classes\EuclideanMetric.cs" />
-    <Compile Include="Classes\WardDistanceCalculator.cs" />
+    <Compile Include="Clustering\ClusterSystem.cs" />
+    <Compile Include="Clustering\Dendrogram.cs" />
+    <Compile Include="Clustering\Algorithms\FastLanceWilliamsAlgorithm.cs" />
+    <Compile Include="Clustering\DistanceCalculators\AverageGroupDistanceCalculator.cs" />
+    <Compile Include="Clustering\DistanceCalculators\CenterDistanceCalculator.cs" />
+    <Compile Include="Clustering\Cluster.cs" />
+    <Compile Include="Clustering\Colors\RGBColor.cs" />
+    <Compile Include="Clustering\Colors\RGBColorCreator.cs" />
+    <Compile Include="Clustering\ClustersDistanceCalculator.cs" />
+    <Compile Include="Clustering\DistanceCalculators\ClosestNeighborDistance.cs" />
+    <Compile Include="Clustering\DistanceCalculators\FarestNeighborDistanceCalculator.cs" />
+    <Compile Include="Clustering\IDistanceCalculator.cs" />
+    <Compile Include="Clustering\ResearchObject.cs" />
+    <Compile Include="Clustering\Metrics\EuclideanMetric.cs" />
+    <Compile Include="Clustering\DistanceCalculators\WardDistanceCalculator.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -107,6 +108,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\clustering_icon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
