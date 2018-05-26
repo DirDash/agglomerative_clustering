@@ -83,5 +83,6 @@
 
             </Canvas>
         </Grid>
+        <Label x:Name="StatusLbl" Content="" Visibility="Hidden" Panel.ZIndex="100" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="971" Width="1277" FontFamily="Segoe UI Black" FontSize="24" FontWeight="Bold" Foreground="#FF252525" Background="#7BFFFFFF"/>
     </Grid>
 </Window>

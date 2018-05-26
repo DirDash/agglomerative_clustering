@@ -5,6 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Threading;
+using System.Windows.Threading;
 using AgglomerativeСlustering.Clustering;
 using AgglomerativeСlustering.Clustering.Clusterizators;
 using AgglomerativeСlustering.Clustering.DistanceCalculators;
@@ -163,6 +165,34 @@ namespace AgglomerativeСlustering
             }
         }
 
+        private void SetStatus(string status)
+        {
+            if (status == "")
+            {
+                StatusLbl.Content = "";
+                StatusLbl.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                StatusLbl.Content = status.ToUpper();
+                StatusLbl.Visibility = Visibility.Visible;
+                AllowUIToUpdate();
+            }
+        }
+
+        private void AllowUIToUpdate()
+        {
+            DispatcherFrame frame = new DispatcherFrame();
+            Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Render, new DispatcherOperationCallback(delegate (object parameter)
+            {
+                frame.Continue = false;
+                return null;
+            }), null);
+
+            Dispatcher.PushFrame(frame);
+            Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
+        }
+
         #endregion
 
         #region Business logic methods
@@ -216,6 +246,7 @@ namespace AgglomerativeСlustering
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message);
+                SetStatus("");
             }
             _objectAmount = objects.Count;
             _objects = objects;
@@ -267,6 +298,7 @@ namespace AgglomerativeСlustering
             var result = fileDialog.ShowDialog();
             if (result == true)
             {
+                SetStatus("Обработка...");
                 var fileName = fileDialog.FileName.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
                 _fileName = fileName.Last();
 
@@ -283,6 +315,7 @@ namespace AgglomerativeСlustering
 
                 InitializeClusterizator();
                 ClusterizeBtn.IsEnabled = true;
+                SetStatus("");
             }
         }
 
@@ -290,6 +323,7 @@ namespace AgglomerativeСlustering
         {
             try
             {
+                SetStatus("Кластеризация...");
                 Clusterize();
 
                 GetClusters();
@@ -298,20 +332,24 @@ namespace AgglomerativeСlustering
 
                 VisualizeClusters(_clusters);
                 VisualizeBtn.IsEnabled = true;
+                SetStatus("");
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message);
+                SetStatus("");
             }
         }
 
         private void VisuzlizeBtn_Click(object sender, RoutedEventArgs e)
         {
+            SetStatus("Отрисовка...");
             GetClusters();
 
             Refresh();
 
             VisualizeClusters(_clusters);
+            SetStatus("");
         }
 
         private void SaveDataBtn_Click(object sender, RoutedEventArgs e)
@@ -325,12 +363,15 @@ namespace AgglomerativeСlustering
                 var result = fileDialog.ShowDialog();
                 if (result == true)
                 {
+                    SetStatus("Сохранение...");
                     SaveClustersToFile(fileDialog.FileName);
+                    SetStatus("");
                 }
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message);
+                SetStatus("");
             }
         }
 
@@ -368,6 +409,7 @@ namespace AgglomerativeСlustering
             {
                 if (n1 < 2)
                     n1 = 2;
+                _n1 = n1;
             }
             else
             {
@@ -386,6 +428,7 @@ namespace AgglomerativeСlustering
             {
                 if (n2 < 2)
                     n2 = 2;
+                _n2 = n2;
             }
             else
             {

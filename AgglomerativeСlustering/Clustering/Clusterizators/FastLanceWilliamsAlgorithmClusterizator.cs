@@ -7,6 +7,8 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
 {
     public class FastLanceWilliamsAlgorithmClusterizator : IClusterizator
     {
+        private static Random _random = new Random();
+
         public IDistanceCalculator ClusterDistanceCalculator { get; set; }
         private ClusterSystem _clusterSystem;
         private Cluster _recepientCluster;
@@ -14,7 +16,7 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
         private Dendrogram _dendrogram;
 
         private Dictionary<string, double> _searchArea;
-        private double _gamma;
+        private double _delta;
         private int _n1;
         private int _n2;
 
@@ -71,8 +73,16 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
                 CalculateSearchArea();
 
             var nearestClustersIndexes = GetNearestClustersIndexes();
-            _recepientCluster = _clusterSystem.Clusters[nearestClustersIndexes.Item1];
-            _donorCluster = _clusterSystem.Clusters[nearestClustersIndexes.Item2];
+            if (_clusterSystem.Clusters[nearestClustersIndexes.Item1].Objects.Count >= _clusterSystem.Clusters[nearestClustersIndexes.Item2].Objects.Count)
+            {
+                _recepientCluster = _clusterSystem.Clusters[nearestClustersIndexes.Item1];
+                _donorCluster = _clusterSystem.Clusters[nearestClustersIndexes.Item2];
+            }
+            else
+            {
+                _recepientCluster = _clusterSystem.Clusters[nearestClustersIndexes.Item2];
+                _donorCluster = _clusterSystem.Clusters[nearestClustersIndexes.Item1];
+            }
 
             _dendrogram.AddNode(_recepientCluster, _donorCluster);
 
@@ -91,22 +101,24 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
             }
             else
             {
-                FindNextGamma();
+                FindNextDelta();
                 _searchArea = new Dictionary<string, double>();
                 foreach (var distance in _clusterSystem.Distances)
-                    if (distance.Value <= _gamma)
+                    if (distance.Value <= _delta)
                         _searchArea.Add(distance.Key, distance.Value);
             }
         }
 
-        private void FindNextGamma()
+        private void FindNextDelta()
         {
-            var random = new Random();
             var allDistances = _clusterSystem.Distances.Values.ToList();
 
             var randomDistances = new List<double>();
             for (int i = 0; i < _n2 && i < allDistances.Count; i++)
-                randomDistances.Add(allDistances[random.Next(0, allDistances.Count)]);
+            {
+                randomDistances.Add(allDistances[_random.Next(0, allDistances.Count)]);
+            }
+
             if (randomDistances.Count == 0)
                 return;
 
@@ -115,7 +127,7 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
                 if (randomDistances[i] < minDistance)
                     minDistance = randomDistances[i];
 
-            _gamma = minDistance;
+            _delta = minDistance;
         }
 
         private Tuple<int, int> GetNearestClustersIndexes()
@@ -127,7 +139,7 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
             }
 
             double minDistance = 0;
-            foreach(var distance in _searchArea.Values)
+            foreach (var distance in _searchArea.Values)
             {
                 minDistance = distance;
                 break;
@@ -190,7 +202,7 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
                 if (_searchArea.Keys.Contains(xzKey))
                     _searchArea[xzKey] = newDistance;
                 else
-                    if (newDistance <= _gamma)
+                    if (newDistance <= _delta)
                         _searchArea.Add(xzKey, newDistance);
             }
         }
