@@ -6,8 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using AgglomerativeСlustering.Clustering;
-using AgglomerativeСlustering.Clustering.Algorithms;
-using AgglomerativeСlustering.Clustering.Colors;
+using AgglomerativeСlustering.Clustering.Clusterizators;
 using AgglomerativeСlustering.Clustering.DistanceCalculators;
 using System.IO;
 using Microsoft.Win32;
@@ -16,16 +15,13 @@ namespace AgglomerativeСlustering
 {
     public partial class MainWindow : Window
     {
-        private ClusterSystem _clusterSystem;
-        private Dendrogram _dendrogram;
+        private List<ResearchObject> _objects;
         private List<Cluster> _clusters;
 
         private string _fileName = "файл не выбран";
         private int _objectAmount;
-        private int _currentClusterNumber;
-        private double _averageClusterDistance = 0;
 
-        private FastLanceWilliamsAlgorithm _clusterizator;
+        private IClusterizator _clusterizator;
         private IDistanceCalculator _distanceCalculator;
         private int _n1 = 50;
         private int _n2 = 20;
@@ -43,34 +39,69 @@ namespace AgglomerativeСlustering
         public MainWindow()
         {
             InitializeComponent();
-
-            FirstInit();
+            SetDefaultValues();
+            DrawCoordinateLine();
         }
-        
-        private void FirstInit()
-        {
-            ClusterizatorCb.Items.Add(new FastLanceWilliamsAlgorithm());
-            ClusterizatorCb.SelectedIndex = 0;
 
+        #region Interface methods
+
+        private void SetDefaultValues()
+        {
+            InitializeClusterizator();
+
+            InitializeClusterDistanceCalculator();
+
+            FirstFeatureMinLbl.Visibility = Visibility.Hidden;
+            FirstFeatureMaxLbl.Visibility = Visibility.Hidden;
+            SecondFeatureMinLbl.Visibility = Visibility.Hidden;
+            SecondFeatureMaxLbl.Visibility = Visibility.Hidden;
+        }
+
+        private void InitializeClusterizator()
+        {
+            ClusterizatorCb.Items.Clear();
+            ClusterizatorCb.Items.Add(new FastLanceWilliamsAlgorithmClusterizator(_n1, _n2));
+            ClusterizatorCb.SelectedIndex = 0;
+        }
+
+        private void InitializeClusterDistanceCalculator()
+        {
             DistanceCalculatorCb.Items.Add(new ClosestNeighborDistanceCalculator());
             DistanceCalculatorCb.Items.Add(new FarestNeighborDistanceCalculator());
             DistanceCalculatorCb.Items.Add(new AverageGroupDistanceCalculator());
             DistanceCalculatorCb.Items.Add(new CenterDistanceCalculator());
             DistanceCalculatorCb.Items.Add(new WardDistanceCalculator());
             DistanceCalculatorCb.SelectedIndex = 4;
-            FirstFeatureMinLbl.Visibility = Visibility.Hidden;
-            FirstFeatureMaxLbl.Visibility = Visibility.Hidden;
-            SecondFeatureMinLbl.Visibility = Visibility.Hidden;
-            SecondFeatureMaxLbl.Visibility = Visibility.Hidden;
-            DrawCoordinateLine();
+        }
+
+        private void DrawCoordinateLine()
+        {
+            Line horizontalLine = new Line();
+            horizontalLine.X1 = 0;
+            horizontalLine.Y1 = VisualizationCanvas.Height / 2;
+            horizontalLine.X2 = VisualizationCanvas.Width;
+            horizontalLine.Y2 = VisualizationCanvas.Height / 2;
+            horizontalLine.Stroke = Brushes.Black;
+            horizontalLine.StrokeThickness = 0.3;
+            Line verticalLine = new Line();
+            verticalLine.X1 = VisualizationCanvas.Width / 2;
+            verticalLine.Y1 = 0;
+            verticalLine.X2 = VisualizationCanvas.Width / 2;
+            verticalLine.Y2 = VisualizationCanvas.Height;
+            verticalLine.Stroke = Brushes.Black;
+            verticalLine.StrokeThickness = 0.3;
+            VisualizationCanvas.Children.Add(horizontalLine);
+            VisualizationCanvas.Children.Add(verticalLine);
         }
 
         private void Refresh()
         {
             FilenameLbl.Content = _fileName;
             ObjectsAmountLbl.Content = _objectAmount;
-            CurrentClustersAmountLbl.Content = _currentClusterNumber;
-            AvgClusterDistanceLbl.Content = String.Format("{0:0.00}", _averageClusterDistance);
+            if (_clusters != null)
+                CurrentClustersAmountLbl.Content = _clusters.Count;
+            else
+                CurrentClustersAmountLbl.Content = 0;
             N1Tbx.Text = _n1.ToString();
             N2Tbx.Text = _n2.ToString();
             ClusterAmountTbx.Text = _clusterAmount.ToString();
@@ -83,94 +114,65 @@ namespace AgglomerativeСlustering
             SecondFeatureMaxLbl.Content = _secondFeatureMax;
         }
 
-        private void GetDataBtn_Click(object sender, RoutedEventArgs e)
+        private double CalculateCoordinate(double currentMin, double currentMax, double realMin, double realMax, double current)
         {
-            _dendrogram = null;
-            var fileDialog = new OpenFileDialog();
-            fileDialog.DefaultExt = ".txt";
-            fileDialog.Filter = "Text documents (.txt)|*.txt";
-            var result = fileDialog.ShowDialog();
-            if (result == true)
+            double positionCoefficient = Math.Abs(current - currentMin) / (currentMax - currentMin);
+            return positionCoefficient * (realMax - realMin) + realMin;
+        }
+
+        private void VisualizeClusters(List<Cluster> clusters)
+        {
+            VisualizationCanvas.Children.Clear();
+            var brushConverter = new BrushConverter();
+            DrawCoordinateLine();
+            foreach (var cluster in clusters)
             {
-                _firstFeatureMin = double.MaxValue;
-                _firstFeatureMax = double.MinValue;
-                _secondFeatureMin = double.MaxValue;
-                _secondFeatureMax = double.MinValue;
-                var fileName = fileDialog.FileName.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                _fileName = fileName.Last();
-                var objects = ReadDataFromFile(fileDialog.FileName);
-
-                _objectAmount = objects.Count;
-                InitializeClusterSystem(objects);
-
-                _averageClusterDistance = ClustersDistanceCalculator.GetAverageClusterDistance(_clusterSystem);
-                Refresh();
-                FirstFeatureMinLbl.Visibility = Visibility.Visible;
-                FirstFeatureMaxLbl.Visibility = Visibility.Visible;
-                SecondFeatureMinLbl.Visibility = Visibility.Visible;
-                SecondFeatureMaxLbl.Visibility = Visibility.Visible;
-                VisualizeClusters(_clusterSystem.Clusters.Values.ToList());
-                ClusterizeBtn.IsEnabled = true;
+                VisualizeObjects(cluster.Objects, new SolidColorBrush(Color.FromRgb(cluster.Color.R, cluster.Color.G, cluster.Color.B)));
             }
         }
 
-        private void ClusterizeBtn_Click(object sender, RoutedEventArgs e)
+        private void VisualizeObjects(List<ResearchObject> objects, SolidColorBrush colorBrush)
         {
-            try
+            foreach (var obj in objects)
             {
-                _dendrogram = _clusterizator.Clusterize((ClusterSystem)_clusterSystem.Clone());
-                Revisualize();
-            }
-            catch (Exception exception)
-            {
-                MessageBox.Show(exception.Message);
+                double x = CalculateCoordinate(
+                    double.Parse(FirstFeatureMinLbl.Content.ToString()),
+                    double.Parse(FirstFeatureMaxLbl.Content.ToString()),
+                    _elipseRadius + 2,
+                    VisualizationCanvas.Width - _elipseRadius - 2,
+                    obj.Features[0]);
+                double y = CalculateCoordinate(
+                    double.Parse(SecondFeatureMinLbl.Content.ToString()),
+                    double.Parse(SecondFeatureMaxLbl.Content.ToString()),
+                    _elipseRadius + 2,
+                    VisualizationCanvas.Height - _elipseRadius - 2,
+                    obj.Features[1]);
+                Point point = new Point(x, VisualizationCanvas.Height - y);
+                Ellipse elipse = new Ellipse();
+
+                elipse.Width = 2 * _elipseRadius;
+                elipse.Height = 2 * _elipseRadius;
+
+                elipse.StrokeThickness = 1;
+                elipse.Stroke = Brushes.DarkGray;
+                elipse.Margin = new Thickness(point.X - _elipseRadius, point.Y - _elipseRadius, 0, 0);
+
+                elipse.Fill = colorBrush;
+
+                VisualizationCanvas.Children.Add(elipse);
             }
         }
 
-        private void VisuzlizeBtn_Click(object sender, RoutedEventArgs e)
-        {
-            Revisualize();
-        }
+        #endregion
 
-        private void SaveDataBtn_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var fileDialog = new SaveFileDialog();
-                fileDialog.DefaultExt = ".txt";
-                fileDialog.Filter = "Text documents (.txt)|*.txt";
-                fileDialog.FileName = "clusters_" + _clusters.Count + "_" + DateTime.Now.Day + "_" + DateTime.Now.Hour + "_" + DateTime.Now.Minute + "_" + DateTime.Now.Second;
-                var result = fileDialog.ShowDialog();
-                if (result == true)
-                {
-                    using (StreamWriter streamWriter = new StreamWriter(fileDialog.FileName))
-                    {
-                        foreach (var cluster in _clusters)
-                        {
-                            string clusterInfo = String.Format("ClusterId: {0} ({1} object", cluster.Id, cluster.Objects.Count);
-                            if (cluster.Objects.Count > 1)
-                                clusterInfo += "s";
-                            clusterInfo += "):";
-                            streamWriter.WriteLine(clusterInfo);
-                            foreach (var obj in cluster.Objects)
-                            {
-                                string objInfo = String.Format("    {0} ({1}: {2}; {3}: {4})", obj.Mark, _firstFeature, obj.Features[0], _secondFeature, obj.Features[1]);
-                                streamWriter.WriteLine(objInfo);
-                            }
-                            streamWriter.WriteLine("");
-                        }
-                    }
-                    MessageBox.Show("Сохрание успешно завершено");
-                }
-            }
-            catch (Exception exception)
-            {
-                MessageBox.Show(exception.Message);
-            }
-        }
+        #region Business logic methods
 
-        private List<ResearchObject> ReadDataFromFile(string path)
+        private void GetObjectsFromFile(string path)
         {
+            _firstFeatureMin = double.MaxValue;
+            _firstFeatureMax = double.MinValue;
+            _secondFeatureMin = double.MaxValue;
+            _secondFeatureMax = double.MinValue;
             var objects = new List<ResearchObject>();
             try
             {
@@ -215,89 +217,140 @@ namespace AgglomerativeСlustering
             {
                 MessageBox.Show(exception.Message);
             }
-            return objects;
+            _objectAmount = objects.Count;
+            _objects = objects;
         }
 
-        private void InitializeClusterSystem(List<ResearchObject> objects)
+        private void Clusterize()
         {
-            var clusters = new List<Cluster>();
-            int lastId = 0;
-            foreach (var obj in objects)
-            {
-                var cluster = new Cluster(lastId, RGBColorCreator.GetRandomColor());
-                lastId++;
-                cluster.Objects.Add(obj);
-                clusters.Add(cluster);
-            }
-
-            _clusterSystem = new ClusterSystem(clusters);
+            _clusterizator.Clusterize(_objects);
         }
 
-        private void VisualizeClusters(List<Cluster> clusters)
+        private void GetClusters()
         {
-            VisualizationCanvas.Children.Clear();
-            var brushConverter = new BrushConverter();
-            DrawCoordinateLine();
-            foreach (var cluster in clusters)
+            _clusters = _clusterizator.GetClusters(_clusterAmount);
+        }
+
+        private void SaveClustersToFile(string path)
+        {
+            using (StreamWriter streamWriter = new StreamWriter(path))
             {
-                foreach (var obj in cluster.Objects)
+                foreach (var cluster in _clusters)
                 {
-                    double x = CalculateCoordinate(
-                        double.Parse(FirstFeatureMinLbl.Content.ToString()),
-                        double.Parse(FirstFeatureMaxLbl.Content.ToString()),
-                        _elipseRadius + 2,
-                        VisualizationCanvas.Width - _elipseRadius - 2,
-                        obj.Features[0]);
-                    double y = CalculateCoordinate(
-                        double.Parse(SecondFeatureMinLbl.Content.ToString()),
-                        double.Parse(SecondFeatureMaxLbl.Content.ToString()),
-                        _elipseRadius + 2,
-                        VisualizationCanvas.Height - _elipseRadius - 2,
-                        obj.Features[1]);
-                    Point point = new Point(x, VisualizationCanvas.Height - y);
-                    Ellipse elipse = new Ellipse();
-
-                    elipse.Width = 2 * _elipseRadius;
-                    elipse.Height = 2 * _elipseRadius;
-
-                    elipse.StrokeThickness = 1;
-                    elipse.Stroke = Brushes.DarkGray;
-                    elipse.Margin = new Thickness(point.X - _elipseRadius, point.Y - _elipseRadius, 0, 0);
-
-                    elipse.Fill = new SolidColorBrush(Color.FromRgb(cluster.Color.R, cluster.Color.G, cluster.Color.B));
-
-                    VisualizationCanvas.Children.Add(elipse);
+                    string clusterInfo = String.Format("ClusterId: {0} ({1} object", cluster.Id, cluster.Objects.Count);
+                    if (cluster.Objects.Count > 1)
+                        clusterInfo += "s";
+                    clusterInfo += "):";
+                    streamWriter.WriteLine(clusterInfo);
+                    foreach (var obj in cluster.Objects)
+                    {
+                        string objInfo = String.Format("    {0} ({1}: {2}; {3}: {4})", obj.Mark, _firstFeature, obj.Features[0], _secondFeature, obj.Features[1]);
+                        streamWriter.WriteLine(objInfo);
+                    }
+                    streamWriter.WriteLine("");
                 }
             }
+            MessageBox.Show("Сохрание успешно завершено");
         }
 
-        private void Revisualize()
+        #endregion
+
+        #region Events
+
+        #region OnClick Events
+
+        private void GetDataBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var fileDialog = new OpenFileDialog();
+            fileDialog.DefaultExt = ".txt";
+            fileDialog.Filter = "Text documents (.txt)|*.txt";
+            var result = fileDialog.ShowDialog();
+            if (result == true)
+            {
+                var fileName = fileDialog.FileName.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                _fileName = fileName.Last();
+
+                GetObjectsFromFile(fileDialog.FileName);
+
+                FirstFeatureMinLbl.Visibility = Visibility.Visible;
+                FirstFeatureMaxLbl.Visibility = Visibility.Visible;
+                SecondFeatureMinLbl.Visibility = Visibility.Visible;
+                SecondFeatureMaxLbl.Visibility = Visibility.Visible;
+
+                Refresh();
+                VisualizationCanvas.Children.Clear();
+                VisualizeObjects(_objects, Brushes.DarkSlateGray);
+
+                InitializeClusterizator();
+                ClusterizeBtn.IsEnabled = true;
+            }
+        }
+
+        private void ClusterizeBtn_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                _clusters = _dendrogram.GetClusters(_clusterAmount);
-                _currentClusterNumber = _clusters.Count;
-                _averageClusterDistance = ClustersDistanceCalculator.GetAverageClusterDistance(_clusterSystem);
+                Clusterize();
+
+                GetClusters();
+
                 Refresh();
+
                 VisualizeClusters(_clusters);
                 VisualizeBtn.IsEnabled = true;
-                SaveDataBtn.IsEnabled = true;
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message);
             }
         }
-        
-        private double CalculateCoordinate(double currentMin, double currentMax, double realMin, double realMax, double current)
+
+        private void VisuzlizeBtn_Click(object sender, RoutedEventArgs e)
         {
-            double positionCoefficient = Math.Abs(current - currentMin) / (currentMax - currentMin);
-            return positionCoefficient * (realMax - realMin) + realMin;
+            GetClusters();
+
+            Refresh();
+
+            VisualizeClusters(_clusters);
         }
+
+        private void SaveDataBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var fileDialog = new SaveFileDialog();
+                fileDialog.DefaultExt = ".txt";
+                fileDialog.Filter = "Text documents (.txt)|*.txt";
+                fileDialog.FileName = "clusters_" + _clusters.Count + "_" + DateTime.Now.Day + "_" + DateTime.Now.Hour + "_" + DateTime.Now.Minute + "_" + DateTime.Now.Second;
+                var result = fileDialog.ShowDialog();
+                if (result == true)
+                {
+                    SaveClustersToFile(fileDialog.FileName);
+                }
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message);
+            }
+        }
+
+        private void ExitBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        #endregion
+
+        #region OnChange Events
 
         private void ClusterizatorCb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _clusterizator = (FastLanceWilliamsAlgorithm)ClusterizatorCb.SelectedItem;
+            if (ClusterizatorCb.SelectedItem != null)
+            {
+                _clusterizator = (IClusterizator)ClusterizatorCb.SelectedItem;
+                if (_distanceCalculator != null)
+                    _clusterizator.ClusterDistanceCalculator = _distanceCalculator;
+            }
         }
 
         private void DistanceCalculatorCb_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -321,6 +374,7 @@ namespace AgglomerativeСlustering
                 _n1 = 2;
                 N1Tbx.Text = _n1.ToString();
             }
+            InitializeClusterizator();
             if (VisualizeBtn != null)
                 VisualizeBtn.IsEnabled = false;
         }
@@ -338,6 +392,7 @@ namespace AgglomerativeСlustering
                 _n2 = 2;
                 N2Tbx.Text = _n2.ToString();
             }
+            InitializeClusterizator();
             if (VisualizeBtn != null)
                 VisualizeBtn.IsEnabled = false;
         }
@@ -378,24 +433,8 @@ namespace AgglomerativeСlustering
             }
         }
 
-        private void DrawCoordinateLine()
-        {
-            Line horizontalLine = new Line();
-            horizontalLine.X1 = 0;
-            horizontalLine.Y1 = VisualizationCanvas.Height / 2;
-            horizontalLine.X2 = VisualizationCanvas.Width;
-            horizontalLine.Y2 = VisualizationCanvas.Height / 2;
-            horizontalLine.Stroke = Brushes.Black;
-            horizontalLine.StrokeThickness = 0.3;
-            Line verticalLine = new Line();
-            verticalLine.X1 = VisualizationCanvas.Width / 2;
-            verticalLine.Y1 = 0;
-            verticalLine.X2 = VisualizationCanvas.Width / 2;
-            verticalLine.Y2 = VisualizationCanvas.Height;
-            verticalLine.Stroke = Brushes.Black;
-            verticalLine.StrokeThickness = 0.3;
-            VisualizationCanvas.Children.Add(horizontalLine);
-            VisualizationCanvas.Children.Add(verticalLine);
-        }
+        #endregion
+
+        #endregion
     }
 }

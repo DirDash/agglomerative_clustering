@@ -1,66 +1,101 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AgglomerativeСlustering.Clustering.Colors;
 
-namespace AgglomerativeСlustering.Clustering.Algorithms
+namespace AgglomerativeСlustering.Clustering.Clusterizators
 {
-    public class FastLanceWilliamsAlgorithm
+    public class FastLanceWilliamsAlgorithmClusterizator : IClusterizator
     {
-        private ClusterSystem _clusterSystem;
         public IDistanceCalculator ClusterDistanceCalculator { get; set; }
+        private ClusterSystem _clusterSystem;
         private Cluster _recepientCluster;
         private Cluster _donorCluster;
+        private Dendrogram _dendrogram;
+
+        private Dictionary<string, double> _searchArea;
         private double _gamma;
         private int _n1;
         private int _n2;
-        private Dictionary<string, double> _closeArea;
 
-        public Dendrogram Clusterize(ClusterSystem clusterSystem, int n1 = 250, int n2 = 50)
+        public FastLanceWilliamsAlgorithmClusterizator(int n1 = 50, int n2 = 20)
         {
-            _clusterSystem = clusterSystem;
             _n1 = n1;
             _n2 = n2;
-            var dendrogram = new Dendrogram();
+        }        
 
+        public override string ToString()
+        {
+            return "быстрый алгоритм Ланса-Уильямса";
+        }
+
+        public void Clusterize(List<ResearchObject> researchObjects)
+        {
+            _clusterSystem = new ClusterSystem(InitialClustering(researchObjects));
+
+            _dendrogram = new Dendrogram();
             foreach (var cluster in _clusterSystem.Clusters.Values)
-                dendrogram.AddNode(cluster);
+                _dendrogram.AddNode(cluster);
 
-            CalculateCloseArea();
+            CalculateSearchArea();
 
             while (_clusterSystem.Clusters.Count > 1)
             {
-                if (_closeArea.Count == 0)
-                    CalculateCloseArea();
-
-                var nearestClustersIds = GetNearestClustersIds();
-                _recepientCluster = _clusterSystem.Clusters[nearestClustersIds.Item1];
-                _donorCluster = _clusterSystem.Clusters[nearestClustersIds.Item2];
-
-                dendrogram.AddNode(_recepientCluster, _donorCluster);
-
-                RecalculateClustersDistances();
-
-                MergeClusters();
-
-                RemoveDonorCluster();
+                PerformClusteringStep();
             }
-
-            return dendrogram;
         }
 
-        private void CalculateCloseArea()
+        public List<Cluster> GetClusters(int clusterAmount)
+        {
+            return _dendrogram.GetClusters(clusterAmount);            
+        }
+
+        private List<Cluster> InitialClustering(List<ResearchObject> objects)
+        {
+            var clusters = new List<Cluster>();
+            int lastId = 0;
+            foreach (var obj in objects)
+            {
+                var cluster = new Cluster(lastId, RGBColorCreator.GetRandomColor());
+                lastId++;
+                cluster.Objects.Add(obj);
+                clusters.Add(cluster);
+            }
+
+            return clusters;
+        }
+
+        private void PerformClusteringStep()
+        {
+            if (_searchArea.Count == 0)
+                CalculateSearchArea();
+
+            var nearestClustersIndexes = GetNearestClustersIndexes();
+            _recepientCluster = _clusterSystem.Clusters[nearestClustersIndexes.Item1];
+            _donorCluster = _clusterSystem.Clusters[nearestClustersIndexes.Item2];
+
+            _dendrogram.AddNode(_recepientCluster, _donorCluster);
+
+            RecalculateClusterDistances();
+
+            MergeClusters();
+
+            RemoveDonorCluster();
+        }
+
+        private void CalculateSearchArea()
         {
             if (_clusterSystem.Clusters.Count <= _n1)
             {
-                _closeArea = _clusterSystem.Distances;
+                _searchArea = _clusterSystem.Distances;
             }
             else
             {
                 FindNextGamma();
-                _closeArea = new Dictionary<string, double>();
+                _searchArea = new Dictionary<string, double>();
                 foreach (var distance in _clusterSystem.Distances)
                     if (distance.Value <= _gamma)
-                        _closeArea.Add(distance.Key, distance.Value);
+                        _searchArea.Add(distance.Key, distance.Value);
             }
         }
 
@@ -83,7 +118,7 @@ namespace AgglomerativeСlustering.Clustering.Algorithms
             _gamma = minDistance;
         }
 
-        private Tuple<int, int> GetNearestClustersIds()
+        private Tuple<int, int> GetNearestClustersIndexes()
         {
             if (_clusterSystem.Clusters.Count == 2)
             {
@@ -92,14 +127,14 @@ namespace AgglomerativeСlustering.Clustering.Algorithms
             }
 
             double minDistance = 0;
-            foreach(var distance in _closeArea.Values)
+            foreach(var distance in _searchArea.Values)
             {
                 minDistance = distance;
                 break;
             }
             var firstId = -1;
             var secondId = -1;
-            foreach (var distance in _closeArea)
+            foreach (var distance in _searchArea)
             {
                 if (distance.Value <= minDistance)
                 {
@@ -113,14 +148,7 @@ namespace AgglomerativeСlustering.Clustering.Algorithms
             return new Tuple<int, int>(firstId, secondId);
         }
 
-        private void MergeClusters()
-        {
-            foreach (var obj in _donorCluster.Objects)
-                _recepientCluster.Objects.Add(obj);
-            _donorCluster.Objects.Clear();
-        }
-
-        private void RecalculateClustersDistances()
+        private void RecalculateClusterDistances()
         {
             foreach (var cluster in _clusterSystem.Clusters)
             {
@@ -159,12 +187,19 @@ namespace AgglomerativeСlustering.Clustering.Algorithms
 
                 _clusterSystem.Distances[xzKey] = newDistance;
 
-                if (_closeArea.Keys.Contains(xzKey))
-                    _closeArea[xzKey] = newDistance;
+                if (_searchArea.Keys.Contains(xzKey))
+                    _searchArea[xzKey] = newDistance;
                 else
                     if (newDistance <= _gamma)
-                        _closeArea.Add(xzKey, newDistance);
+                        _searchArea.Add(xzKey, newDistance);
             }
+        }
+
+        private void MergeClusters()
+        {
+            foreach (var obj in _donorCluster.Objects)
+                _recepientCluster.Objects.Add(obj);
+            _donorCluster.Objects.Clear();
         }
 
         private void RemoveDonorCluster()
@@ -181,15 +216,10 @@ namespace AgglomerativeСlustering.Clustering.Algorithms
                     distanceKey = cluster.Key + "to" + _donorCluster.Id;
 
                 _clusterSystem.Distances.Remove(distanceKey);
-                _closeArea.Remove(distanceKey);
+                _searchArea.Remove(distanceKey);
             }
 
             _clusterSystem.Clusters.Remove(_donorCluster.Id);
-        }
-
-        public override string ToString()
-        {
-            return "быстрый алгоритм Ланса-Уильямса";
         }
     }
 }

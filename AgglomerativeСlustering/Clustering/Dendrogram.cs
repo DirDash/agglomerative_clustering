@@ -37,10 +37,10 @@ namespace AgglomerativeСlustering.Clustering
             _head = node;
         }
 
-        public List<Cluster> GetClusters(int clusterNumber)
+        public List<Cluster> GetClusters(int clusterAmount)
         {
             var clusters = new List<Cluster>();
-            if (clusterNumber <= 1)
+            if (clusterAmount <= 1)
             {
                 var allObjects = _head.GetObjects();
                 var cluster = new Cluster(_head.Id, _head.Color);
@@ -51,17 +51,17 @@ namespace AgglomerativeСlustering.Clustering
             }
             var queue = new Queue<DendrogramNode>();
             queue.Enqueue(_head);
-
+            
             while (true)
             {
                 var node = queue.Dequeue();
-                if (node.Level == clusterNumber)
+                if (node.Level == clusterAmount)
                 {
                     queue.Enqueue(node.LeftChild);
                     queue.Enqueue(node.RightChild);
                     break;
                 }
-                if (node.Level == -1 || node.Level > clusterNumber)
+                if (node.Level == -1 || node.Level > clusterAmount)
                 {
                     queue.Enqueue(node);
                     continue;
@@ -72,7 +72,7 @@ namespace AgglomerativeСlustering.Clustering
             while (queue.Count > 0)
             {
                 var node = queue.Dequeue();
-                if (node.Level != -1 && node.Level < clusterNumber)
+                if (node.Level != -1 && node.Level < clusterAmount)
                 {
                     queue.Enqueue(node.LeftChild);
                     queue.Enqueue(node.RightChild);
@@ -88,18 +88,18 @@ namespace AgglomerativeСlustering.Clustering
 
     class DendrogramNode
     {
-        public int Id;
-        public RGBColor Color;
-        public ResearchObject Object;
-        public DendrogramNode LeftChild;
-        public DendrogramNode RightChild;
-        public int Level;
+        public int Id { get; private set; }
+        public RGBColor Color { get; private set; }
+        public ResearchObject Object { get; private set; }
+        public DendrogramNode LeftChild { get; private set; }
+        public DendrogramNode RightChild { get; private set; }
+        public int Level { get; private set; }
 
-        public DendrogramNode(int id, RGBColor color, ResearchObject obj)
+        public DendrogramNode(int id, RGBColor color, ResearchObject researchObject)
         {
             Id = id;
             Color = color;
-            Object = obj;
+            Object = researchObject;
             LeftChild = null;
             RightChild = null;
             Level = -1;

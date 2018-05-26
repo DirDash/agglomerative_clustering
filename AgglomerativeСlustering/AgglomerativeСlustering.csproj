@@ -65,15 +65,16 @@
     </Compile>
     <Compile Include="Clustering\ClusterSystem.cs" />
     <Compile Include="Clustering\Dendrogram.cs" />
-    <Compile Include="Clustering\Algorithms\FastLanceWilliamsAlgorithm.cs" />
+    <Compile Include="Clustering\Clusterizators\FastLanceWilliamsAlgorithmClusterizator.cs" />
     <Compile Include="Clustering\DistanceCalculators\AverageGroupDistanceCalculator.cs" />
     <Compile Include="Clustering\DistanceCalculators\CenterDistanceCalculator.cs" />
     <Compile Include="Clustering\Cluster.cs" />
     <Compile Include="Clustering\Colors\RGBColor.cs" />
     <Compile Include="Clustering\Colors\RGBColorCreator.cs" />
-    <Compile Include="Clustering\ClustersDistanceCalculator.cs" />
+    <Compile Include="Clustering\ClusterDistanceCalculator.cs" />
     <Compile Include="Clustering\DistanceCalculators\ClosestNeighborDistance.cs" />
     <Compile Include="Clustering\DistanceCalculators\FarestNeighborDistanceCalculator.cs" />
+    <Compile Include="Clustering\IClusterizator.cs" />
     <Compile Include="Clustering\IDistanceCalculator.cs" />
     <Compile Include="Clustering\ResearchObject.cs" />
     <Compile Include="Clustering\Metrics\EuclideanMetric.cs" />

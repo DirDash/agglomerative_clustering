@@ -2,7 +2,7 @@
 
 namespace AgglomerativeСlustering.Clustering
 {
-    public static class ClustersDistanceCalculator
+    public static class ClusterDistanceCalculator
     {
         public static double GetLanceWilliamsDistance(double xzDistance, double yzDistance, double xyDistance, double alphaX, double alphaY, double beta, double gamma)
         {
@@ -14,7 +14,6 @@ namespace AgglomerativeСlustering.Clustering
             double totalDistance = 0;
             foreach (var distance in clusterSystem.Distances)
             {
-                var clusterIds = distance.Key.Split(new string[]{ "to" }, StringSplitOptions.RemoveEmptyEntries);
                 totalDistance += distance.Value;
             }
 

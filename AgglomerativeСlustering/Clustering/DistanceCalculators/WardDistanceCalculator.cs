@@ -8,7 +8,7 @@
             double alphaY = (double)(yCount + zCount) / (xCount + yCount + zCount);
             double beta = (double)-1 * zCount / (xCount + yCount + zCount);
             double gamma = 0;
-            return ClustersDistanceCalculator.GetLanceWilliamsDistance(xzDistance, yzDistance, xyDistance, alphaX, alphaY, beta, gamma);
+            return ClusterDistanceCalculator.GetLanceWilliamsDistance(xzDistance, yzDistance, xyDistance, alphaX, alphaY, beta, gamma);
         }
 
         public override string ToString()

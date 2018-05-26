@@ -8,7 +8,7 @@
             double alphaY = 0.5;
             double beta = 0;
             double gamma = 0.5;
-            return ClustersDistanceCalculator.GetLanceWilliamsDistance(xzDistance, yzDistance, xyDistance, alphaX, alphaY, beta, gamma);
+            return ClusterDistanceCalculator.GetLanceWilliamsDistance(xzDistance, yzDistance, xyDistance, alphaX, alphaY, beta, gamma);
         }
 
         public override string ToString()
