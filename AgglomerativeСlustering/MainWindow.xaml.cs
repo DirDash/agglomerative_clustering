@@ -306,6 +306,8 @@ namespace AgglomerativeСlustering
 
                     InitializeClusterizators();
                     ClusterizeBtn.IsEnabled = true;
+                    VisualizeBtn.IsEnabled = false;
+                    SaveDataBtn.IsEnabled = false;
                     SetStatus("");
                 }
             }
@@ -332,6 +334,7 @@ namespace AgglomerativeСlustering
                 VisualizeClusters(_clusters);
 
                 VisualizeBtn.IsEnabled = true;
+                SaveDataBtn.IsEnabled = true;
                 SetStatus("");
             }
             catch (Exception)
@@ -412,6 +415,8 @@ namespace AgglomerativeСlustering
             _clusterizator.ClusterDistanceCalculator = _distanceCalculator;
             if (VisualizeBtn != null)
                 VisualizeBtn.IsEnabled = false;
+            if (SaveDataBtn != null)
+                SaveDataBtn.IsEnabled = false;
         }
 
         private void N1Tbx_TextChanged(object sender, TextChangedEventArgs e)
@@ -431,6 +436,8 @@ namespace AgglomerativeСlustering
             InitializeClusterizators();
             if (VisualizeBtn != null)
                 VisualizeBtn.IsEnabled = false;
+            if (SaveDataBtn != null)
+                SaveDataBtn.IsEnabled = false;
         }
 
         private void N2Tbx_TextChanged(object sender, TextChangedEventArgs e)
@@ -450,6 +457,8 @@ namespace AgglomerativeСlustering
             InitializeClusterizators();
             if (VisualizeBtn != null)
                 VisualizeBtn.IsEnabled = false;
+            if (SaveDataBtn != null)
+                SaveDataBtn.IsEnabled = false;
         }
 
         private void ClusterAmountTbx_TextChanged(object sender, TextChangedEventArgs e)
