@@ -37,7 +37,9 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
 
             _dendrogram = new Dendrogram();
             foreach (var cluster in _clusterSystem.Clusters.Values)
+            {
                 _dendrogram.AddNode(cluster);
+            }
 
             CalculateSearchArea();
 
@@ -60,7 +62,7 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
             {
                 var cluster = new Cluster(lastId, RGBColorCreator.GetRandomColor());
                 lastId++;
-                cluster.Objects.Add(obj);
+                cluster.Objects.Add((ResearchObject)obj.Clone());
                 clusters.Add(cluster);
             }
 
@@ -69,8 +71,10 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
 
         private void PerformClusteringStep()
         {
-            if (_searchArea.Count == 0)
+            if (_clusterSystem.Clusters.Count <= _n1 || _searchArea.Count <= 1)
+            {
                 CalculateSearchArea();
+            }
 
             var nearestClustersIndexes = GetNearestClustersIndexes();
             if (_clusterSystem.Clusters[nearestClustersIndexes.Item1].Objects.Count >= _clusterSystem.Clusters[nearestClustersIndexes.Item2].Objects.Count)
@@ -124,10 +128,14 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
 
             double minDistance = randomDistances[0];
             for (int i = 1; i < randomDistances.Count; i++)
+            {
                 if (randomDistances[i] < minDistance)
+                {
                     minDistance = randomDistances[i];
+                }
+            }
 
-            _delta = minDistance;
+            _delta = minDistance + 0.1;
         }
 
         private Tuple<int, int> GetNearestClustersIndexes()
@@ -138,12 +146,7 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
                 return new Tuple<int, int>(clusters[0].Id, clusters[1].Id);
             }
 
-            double minDistance = 0;
-            foreach (var distance in _searchArea.Values)
-            {
-                minDistance = distance;
-                break;
-            }
+            double minDistance = _searchArea.Values.First() + 1;
             var firstId = -1;
             var secondId = -1;
             foreach (var distance in _searchArea)
@@ -156,7 +159,6 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
                     secondId = int.Parse(ids[1]);                    
                 }
             }
-
             return new Tuple<int, int>(firstId, secondId);
         }
 
@@ -200,17 +202,35 @@ namespace AgglomerativeСlustering.Clustering.Clusterizators
                 _clusterSystem.Distances[xzKey] = newDistance;
 
                 if (_searchArea.Keys.Contains(xzKey))
-                    _searchArea[xzKey] = newDistance;
-                else
+                {
                     if (newDistance <= _delta)
+                    {
+                        _searchArea[xzKey] = newDistance;
+                    }
+                    else
+                    {
+                        if (_clusterSystem.Clusters.Count > _n1)
+                        {
+                            _searchArea.Remove(xzKey);
+                        }
+                    }
+                }
+                else
+                {
+                    if (newDistance <= _delta)
+                    {
                         _searchArea.Add(xzKey, newDistance);
+                    }
+                }
             }
         }
 
         private void MergeClusters()
         {
             foreach (var obj in _donorCluster.Objects)
+            {
                 _recepientCluster.Objects.Add(obj);
+            }
             _donorCluster.Objects.Clear();
         }
 

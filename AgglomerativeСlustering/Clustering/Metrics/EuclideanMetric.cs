@@ -12,7 +12,9 @@ namespace AgglomerativeСlustering.Clustering.Metrics
             int featuresCount = x.Features.Count;
             double distance = 0;
             for (int i = 0; i < featuresCount; i++)
+            {
                 distance += Math.Pow((x.Features[i] - y.Features[i]), 2);
+            }
 
             return Math.Sqrt(distance);
         }

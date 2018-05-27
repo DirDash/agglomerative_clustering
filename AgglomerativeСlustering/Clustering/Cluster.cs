@@ -4,7 +4,7 @@ using AgglomerativeСlustering.Clustering.Colors;
 
 namespace AgglomerativeСlustering.Clustering
 {
-    public class Cluster : ICloneable
+    public class Cluster
     {
         public int Id { get; private set; }
         public RGBColor Color;
@@ -22,14 +22,6 @@ namespace AgglomerativeСlustering.Clustering
             Id = id;
             Color = color;
             Objects = objects;
-        }
-
-        public object Clone()
-        {
-            Cluster copy = new Cluster(Id, Color);
-            foreach (var obj in Objects)
-                copy.Objects.Add((ResearchObject)obj.Clone());
-            return copy;
         }
     }
 }

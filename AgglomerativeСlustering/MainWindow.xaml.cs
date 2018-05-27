@@ -5,13 +5,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Threading;
 using System.Windows.Threading;
+using System.IO;
+using Microsoft.Win32;
 using AgglomerativeСlustering.Clustering;
 using AgglomerativeСlustering.Clustering.Clusterizators;
 using AgglomerativeСlustering.Clustering.DistanceCalculators;
-using System.IO;
-using Microsoft.Win32;
 
 namespace AgglomerativeСlustering
 {
@@ -42,16 +41,16 @@ namespace AgglomerativeСlustering
         {
             InitializeComponent();
             SetDefaultValues();
-            DrawCoordinateLine();
+            DrawCoordinateLines();
         }
 
         #region Interface methods
 
         private void SetDefaultValues()
         {
-            InitializeClusterizator();
+            InitializeClusterizators();
 
-            InitializeClusterDistanceCalculator();
+            InitializeClusterDistanceCalculators();
 
             FirstFeatureMinLbl.Visibility = Visibility.Hidden;
             FirstFeatureMaxLbl.Visibility = Visibility.Hidden;
@@ -59,14 +58,14 @@ namespace AgglomerativeСlustering
             SecondFeatureMaxLbl.Visibility = Visibility.Hidden;
         }
 
-        private void InitializeClusterizator()
+        private void InitializeClusterizators()
         {
             ClusterizatorCb.Items.Clear();
             ClusterizatorCb.Items.Add(new FastLanceWilliamsAlgorithmClusterizator(_n1, _n2));
             ClusterizatorCb.SelectedIndex = 0;
         }
 
-        private void InitializeClusterDistanceCalculator()
+        private void InitializeClusterDistanceCalculators()
         {
             DistanceCalculatorCb.Items.Add(new ClosestNeighborDistanceCalculator());
             DistanceCalculatorCb.Items.Add(new FarestNeighborDistanceCalculator());
@@ -76,7 +75,7 @@ namespace AgglomerativeСlustering
             DistanceCalculatorCb.SelectedIndex = 4;
         }
 
-        private void DrawCoordinateLine()
+        private void DrawCoordinateLines()
         {
             Line horizontalLine = new Line();
             horizontalLine.X1 = 0;
@@ -123,10 +122,8 @@ namespace AgglomerativeСlustering
         }
 
         private void VisualizeClusters(List<Cluster> clusters)
-        {
-            VisualizationCanvas.Children.Clear();
+        {            
             var brushConverter = new BrushConverter();
-            DrawCoordinateLine();
             foreach (var cluster in clusters)
             {
                 VisualizeObjects(cluster.Objects, new SolidColorBrush(Color.FromRgb(cluster.Color.R, cluster.Color.G, cluster.Color.B)));
@@ -156,7 +153,7 @@ namespace AgglomerativeСlustering
                 elipse.Height = 2 * _elipseRadius;
 
                 elipse.StrokeThickness = 1;
-                elipse.Stroke = Brushes.DarkGray;
+                elipse.Stroke = Brushes.DarkSlateGray;
                 elipse.Margin = new Thickness(point.X - _elipseRadius, point.Y - _elipseRadius, 0, 0);
 
                 elipse.Fill = colorBrush;
@@ -204,49 +201,41 @@ namespace AgglomerativeСlustering
             _secondFeatureMin = double.MaxValue;
             _secondFeatureMax = double.MinValue;
             var objects = new List<ResearchObject>();
-            try
+            using (StreamReader streamReader = new StreamReader(path))
             {
-                using (StreamReader streamReader = new StreamReader(path))
+                string line = streamReader.ReadLine();
+                var headers = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                _firstFeature = headers[0];
+                _secondFeature = headers[1];
+                int lastId = 0;
+                while ((line = streamReader.ReadLine()) != null)
                 {
-                    string line = streamReader.ReadLine();
-                    var headers = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    _firstFeature = headers[0];
-                    _secondFeature = headers[1];
-                    int lastId = 0;
-                    while ((line = streamReader.ReadLine()) != null)
+                    var splitedLine = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    double firstFeature = double.Parse(splitedLine[0]);
+                    double secondFeature = double.Parse(splitedLine[1]);
+
+                    if (firstFeature < _firstFeatureMin)
+                        _firstFeatureMin = firstFeature;
+                    if (firstFeature > _firstFeatureMax)
+                        _firstFeatureMax = firstFeature;
+                    if (secondFeature < _secondFeatureMin)
+                        _secondFeatureMin = secondFeature;
+                    if (secondFeature > _secondFeatureMax)
+                        _secondFeatureMax = secondFeature;
+
+                    string mark = "";
+                    if (headers.Length == 3 && splitedLine.Length == 3)
                     {
-                        var splitedLine = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                        double firstFeature = double.Parse(splitedLine[0]);
-                        double secondFeature = double.Parse(splitedLine[1]);
-
-                        if (firstFeature < _firstFeatureMin)
-                            _firstFeatureMin = firstFeature;
-                        if (firstFeature > _firstFeatureMax)
-                            _firstFeatureMax = firstFeature;
-                        if (secondFeature < _secondFeatureMin)
-                            _secondFeatureMin = secondFeature;
-                        if (secondFeature > _secondFeatureMax)
-                            _secondFeatureMax = secondFeature;
-
-                        string mark = "";
-                        if (headers.Length == 3 && splitedLine.Length == 3)
-                        {
-                            mark = splitedLine[2];
-                        }
-                        else
-                        {
-                            mark = lastId.ToString();
-                            lastId++;
-                        }
-                        var obj = new ResearchObject(mark, new List<double>() { firstFeature, secondFeature });
-                        objects.Add(obj);
+                        mark = splitedLine[2];
                     }
+                    else
+                    {
+                        mark = lastId.ToString();
+                        lastId++;
+                    }
+                    var obj = new ResearchObject(mark, new List<double>() { firstFeature, secondFeature });
+                    objects.Add(obj);
                 }
-            }
-            catch (Exception exception)
-            {
-                MessageBox.Show(exception.Message);
-                SetStatus("");
             }
             _objectAmount = objects.Count;
             _objects = objects;
@@ -281,7 +270,6 @@ namespace AgglomerativeСlustering
                     streamWriter.WriteLine("");
                 }
             }
-            MessageBox.Show("Сохрание успешно завершено");
         }
 
         #endregion
@@ -292,29 +280,38 @@ namespace AgglomerativeСlustering
 
         private void GetDataBtn_Click(object sender, RoutedEventArgs e)
         {
-            var fileDialog = new OpenFileDialog();
-            fileDialog.DefaultExt = ".txt";
-            fileDialog.Filter = "Text documents (.txt)|*.txt";
-            var result = fileDialog.ShowDialog();
-            if (result == true)
+            try
             {
-                SetStatus("Обработка...");
-                var fileName = fileDialog.FileName.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                _fileName = fileName.Last();
+                var fileDialog = new OpenFileDialog();
+                fileDialog.DefaultExt = ".txt";
+                fileDialog.Filter = "Text documents (.txt)|*.txt";
+                var result = fileDialog.ShowDialog();
+                if (result == true)
+                {
+                    SetStatus("Обработка...");
+                    var fileName = fileDialog.FileName.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                    _fileName = fileName.Last();
 
-                GetObjectsFromFile(fileDialog.FileName);
+                    GetObjectsFromFile(fileDialog.FileName);
 
-                FirstFeatureMinLbl.Visibility = Visibility.Visible;
-                FirstFeatureMaxLbl.Visibility = Visibility.Visible;
-                SecondFeatureMinLbl.Visibility = Visibility.Visible;
-                SecondFeatureMaxLbl.Visibility = Visibility.Visible;
+                    FirstFeatureMinLbl.Visibility = Visibility.Visible;
+                    FirstFeatureMaxLbl.Visibility = Visibility.Visible;
+                    SecondFeatureMinLbl.Visibility = Visibility.Visible;
+                    SecondFeatureMaxLbl.Visibility = Visibility.Visible;
 
-                Refresh();
-                VisualizationCanvas.Children.Clear();
-                VisualizeObjects(_objects, Brushes.DarkSlateGray);
+                    Refresh();
+                    VisualizationCanvas.Children.Clear();
+                    DrawCoordinateLines();
+                    VisualizeObjects(_objects, Brushes.DarkGray);
 
-                InitializeClusterizator();
-                ClusterizeBtn.IsEnabled = true;
+                    InitializeClusterizators();
+                    ClusterizeBtn.IsEnabled = true;
+                    SetStatus("");
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Ошибка при попытке загрузки файла." + '\n' + "Убедитесь, что файл имеет корректный формат." + '\n' + "Подробнее: https://github.com/DirDash/agglomerative_clustering");
                 SetStatus("");
             }
         }
@@ -330,26 +327,40 @@ namespace AgglomerativeСlustering
 
                 Refresh();
 
+                VisualizationCanvas.Children.Clear();
+                DrawCoordinateLines();
                 VisualizeClusters(_clusters);
+
                 VisualizeBtn.IsEnabled = true;
                 SetStatus("");
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                MessageBox.Show(exception.Message);
+                MessageBox.Show("Ошибка кластеризации." + '\n' + "Убедитесь, что входные данные имели корректный формат." + '\n' + "Подробнее: https://github.com/DirDash/agglomerative_clustering");
                 SetStatus("");
             }
         }
 
         private void VisuzlizeBtn_Click(object sender, RoutedEventArgs e)
         {
-            SetStatus("Отрисовка...");
-            GetClusters();
+            try
+            {
+                SetStatus("Отрисовка...");
+                GetClusters();
 
-            Refresh();
+                Refresh();
 
-            VisualizeClusters(_clusters);
-            SetStatus("");
+                VisualizationCanvas.Children.Clear();
+                DrawCoordinateLines();
+                VisualizeClusters(_clusters);
+
+                SetStatus("");
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Ошибка отрисовки." + '\n' + "Повторите попытку или перезагрузите приложение.");
+                SetStatus("");
+            }
         }
 
         private void SaveDataBtn_Click(object sender, RoutedEventArgs e)
@@ -366,11 +377,12 @@ namespace AgglomerativeСlustering
                     SetStatus("Сохранение...");
                     SaveClustersToFile(fileDialog.FileName);
                     SetStatus("");
+                    MessageBox.Show("Сохрание завершено успешно");
                 }
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                MessageBox.Show(exception.Message);
+                MessageBox.Show("Ошибка при попытке сохранения файла." + '\n' + "Повторите попытку или перезагрузите приложение.");
                 SetStatus("");
             }
         }
@@ -416,7 +428,7 @@ namespace AgglomerativeСlustering
                 _n1 = 2;
                 N1Tbx.Text = _n1.ToString();
             }
-            InitializeClusterizator();
+            InitializeClusterizators();
             if (VisualizeBtn != null)
                 VisualizeBtn.IsEnabled = false;
         }
@@ -435,7 +447,7 @@ namespace AgglomerativeСlustering
                 _n2 = 2;
                 N2Tbx.Text = _n2.ToString();
             }
-            InitializeClusterizator();
+            InitializeClusterizators();
             if (VisualizeBtn != null)
                 VisualizeBtn.IsEnabled = false;
         }
